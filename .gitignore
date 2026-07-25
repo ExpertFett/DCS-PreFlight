@@ -1,0 +1,12 @@
+# Personal config - generated per machine on first run
+apps.json
+
+# Build output - published as GitHub Release assets instead
+dist/
+
+# Scratch
+_smoke*.txt
+*.bak
+*.tmp
+Thumbs.db
+desktop.ini
