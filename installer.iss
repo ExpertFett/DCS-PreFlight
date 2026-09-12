@@ -2,7 +2,10 @@
 ; Per-user install (no admin) so apps.json stays writable next to the scripts.
 
 #define AppName    "DCS Pre-Flight Launcher"
-#define AppVersion "1.0.0"
+; Build-Package.ps1 passes /DAppVersion=x.y.z; this is only the fallback.
+#ifndef AppVersion
+  #define AppVersion "1.0.1"
+#endif
 #define AppPublisher "ExpertFett"
 #define AppExeName "DCS-Preflight-Manager.bat"
 

@@ -142,18 +142,29 @@ function Find-PfAutoTune($scriptRoot) {
     return ''
 }
 
+function Find-PfModAudit($scriptRoot) {
+    foreach ($p in @((Join-Path $scriptRoot 'Check-DcsUpdate.ps1'),
+                     (Join-Path (Split-Path -Parent $scriptRoot) 'DCS-ModAudit\Check-DcsUpdate.ps1'),
+                     "$env:USERPROFILE\Saved Games\Claude Dump\DCS-ModAudit\Check-DcsUpdate.ps1")) {
+        if (Test-Path -LiteralPath $p) { return $p }
+    }
+    return ''
+}
+
 # Build a fresh config for this machine and write it to $cfgPath.
 function Initialize-PfConfig($cfgPath, $scriptRoot) {
-    $apps = Find-PfApps
-    $dcs  = Find-PfDcsExe
-    $tune = Find-PfAutoTune $scriptRoot
+    $apps  = Find-PfApps
+    $dcs   = Find-PfDcsExe
+    $tune  = Find-PfAutoTune $scriptRoot
+    $audit = Find-PfModAudit $scriptRoot
     $cfg = @{
         settings = @{
-            launchDcs    = [bool]$dcs
-            dcsExe       = $dcs
-            dcsCountdown = 6
-            autotune     = @{ enabled = [bool]$tune; script = $tune; mode = 'Balanced' }
-            popupRules   = @(
+            launchDcs     = [bool]$dcs
+            dcsExe        = $dcs
+            dcsCountdown  = 6
+            autotune      = @{ enabled = [bool]$tune; script = $tune; mode = 'Balanced' }
+            modAuditCheck = @{ enabled = [bool]$audit; script = $audit; quiet = $true }
+            popupRules    = @(
                 @{ titleMatch = 'Update Available'; keys = '{ESC}'; enabled = $false }
                 @{ titleMatch = 'New version';      keys = '{ESC}'; enabled = $false }
             )

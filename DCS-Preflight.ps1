@@ -51,6 +51,32 @@ function Test-Running($proc) {
     return [bool](Get-Process -Name $proc -ErrorAction SilentlyContinue)
 }
 
+$script:modAuditStale = $false
+
+# ---- mod-audit check ------------------------------------------------------
+# Runs the read-only DCS update watcher (Check-DcsUpdate.ps1) in its own
+# process so its exit code is clean. exit 1 = DCS updated since mods were last
+# audited; the script prints its own banner + drops a Desktop notice. Never
+# fatal - a stale build only warns, it does not block the launch.
+function Invoke-ModAuditCheck {
+    $mc = $settings.modAuditCheck
+    if (-not $mc -or -not $mc.enabled)              { Write-Skip 'mod-audit check disabled'; return }
+    if (-not $mc.script -or -not (Test-Path -LiteralPath $mc.script)) {
+        Write-Skip "mod-audit check not installed: $($mc.script)"; return
+    }
+    try {
+        $psArgs = @('-NoProfile','-ExecutionPolicy','Bypass','-File', $mc.script)
+        if ($mc.quiet) { $psArgs += '-Quiet' }
+        & powershell @psArgs
+        $code = $LASTEXITCODE
+        if     ($code -eq 1) { $script:modAuditStale = $true; Write-Warn2 'DCS updated since your mods were last audited (Desktop notice written)' }
+        elseif ($code -eq 0) { Write-Ok 'mods verified against the current DCS build' }
+        else                 { Write-Skip 'mod-audit check could not read the DCS install' }
+    } catch {
+        Write-Warn2 "mod-audit check failed (continuing): $($_.Exception.Message)"
+    }
+}
+
 # ---- window / action helpers ---------------------------------------------
 function Wait-ForWindow($substr, $timeoutSec) {
     if (-not $substr) { return [IntPtr]::Zero }
@@ -196,17 +222,35 @@ Write-Host '              DCS PRE-FLIGHT LAUNCHER' -ForegroundColor White
 Write-Host '============================================================' -ForegroundColor White
 
 $step = 1
+
+# Optional steps only appear when configured, so users without these tools
+# never see dead "disabled" lines.
+$mc = $settings.modAuditCheck
+if ($mc -and $mc.enabled -and $mc.script) {
+    Write-Step $step 'Mod-audit check'
+    Invoke-ModAuditCheck
+    $step++
+}
+
 foreach ($app in $cfg.apps) {
     Write-Step $step $app.name
     Start-App $app
     $step++
 }
 
-Write-Step $step "DCS-AutoTune ($TuneMode)"
-Invoke-AutoTune
-$step++
+$at = $settings.autotune
+if ($at -and $at.enabled -and $at.script) {
+    Write-Step $step "DCS-AutoTune ($TuneMode)"
+    Invoke-AutoTune
+    $step++
+}
 
 Write-Step $step 'DCS World MT'
+if ($script:modAuditStale) {
+    Write-Host ''
+    Write-Host '  !! DCS updated since your mods were last audited - they may be broken.' -ForegroundColor Yellow
+    Write-Host '     Cancel the countdown below if you want to run the mod audit first.' -ForegroundColor Yellow
+}
 $launched = Start-DCS
 
 Write-Host ''

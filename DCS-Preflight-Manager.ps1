@@ -60,6 +60,11 @@ function Load-Config {
                 script  = [string]$raw.settings.autotune.script
                 mode    = [string]$raw.settings.autotune.mode
             }
+            modAuditCheck = @{
+                enabled = [bool]$raw.settings.modAuditCheck.enabled
+                script  = [string]$raw.settings.modAuditCheck.script
+                quiet   = if ($null -ne $raw.settings.modAuditCheck.quiet) { [bool]$raw.settings.modAuditCheck.quiet } else { $true }
+            }
             popupRules = New-Object System.Collections.ArrayList
         }
         apps = New-Object System.Collections.ArrayList

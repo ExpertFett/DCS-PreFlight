@@ -115,6 +115,20 @@ DCS-Preflight.ps1 -TuneMode Quality      # Performance | Balanced | Quality
 lives in `%LOCALAPPDATA%\DCS-Preflight\apps.json` instead. It is plain JSON -
 back it up, or hand-edit it if you prefer.
 
+### Optional: pre-launch check script
+
+Advanced users can run their own check before anything launches - for example,
+a script that notices DCS updated and your mods may need re-checking. Add this to
+`settings` in `apps.json`:
+
+```json
+"modAuditCheck": { "enabled": true, "script": "C:\\path\\to\\your-check.ps1", "quiet": true }
+```
+
+The script is run with `-Quiet` when `quiet` is true. Exit `0` = all good,
+exit `1` = warn before the DCS countdown (so you can cancel), anything else = ignored.
+It never blocks the launch. Leave it out entirely and the step does not appear.
+
 ---
 
 ## Troubleshooting
