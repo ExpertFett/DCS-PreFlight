@@ -136,7 +136,7 @@ function Find-PfDcsExe {
 function Find-PfAutoTune($scriptRoot) {
     foreach ($p in @((Join-Path $scriptRoot 'Tune-DCS.ps1'),
                      (Join-Path (Split-Path -Parent $scriptRoot) 'DCS-AutoTune\Tune-DCS.ps1'),
-                     "$env:USERPROFILE\Saved Games\Claude Dump\DCS-AutoTune\Tune-DCS.ps1")) {
+                     "$env:USERPROFILE\OneDrive\everything\Desktop\New folder\Claude Dump\DCS-AutoTune\Tune-DCS.ps1")) {
         if (Test-Path -LiteralPath $p) { return $p }
     }
     return ''
@@ -145,7 +145,7 @@ function Find-PfAutoTune($scriptRoot) {
 function Find-PfModAudit($scriptRoot) {
     foreach ($p in @((Join-Path $scriptRoot 'Check-DcsUpdate.ps1'),
                      (Join-Path (Split-Path -Parent $scriptRoot) 'DCS-ModAudit\Check-DcsUpdate.ps1'),
-                     "$env:USERPROFILE\Saved Games\Claude Dump\DCS-ModAudit\Check-DcsUpdate.ps1")) {
+                     "$env:USERPROFILE\OneDrive\everything\Desktop\New folder\Claude Dump\DCS-ModAudit\Check-DcsUpdate.ps1")) {
         if (Test-Path -LiteralPath $p) { return $p }
     }
     return ''
